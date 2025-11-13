@@ -1,4 +1,4 @@
-// 영상 리스트와 정답 설정
+// 🎥 영상 리스트 & 정답
 const videos = [
   { src: "videos/1.mp4", answer: "디바" },
   { src: "videos/2.mp4", answer: "겐지" },
@@ -52,39 +52,52 @@ let score = 0;
 const video = document.getElementById("video");
 const answerInput = document.getElementById("answer");
 const submitBtn = document.getElementById("submit");
-const nextBtn = document.getElementById("next");
 const result = document.getElementById("result");
 
+// 🎬 영상 로드
 function loadVideo() {
   if (current >= videos.length) {
     showFinalResult();
     return;
   }
-  video.src = videos[current].src;
+
+  const v = videos[current];
+  video.src = v.src;
+  video.load(); // GitHub Pages에서도 정상 로드되게
+  video.play().catch(() => {}); // 자동 재생 시도
+
   answerInput.value = "";
+  answerInput.disabled = false;
+  submitBtn.disabled = false;
   result.textContent = "";
-  nextBtn.style.display = "none";
 }
 
+// ✅ 정답 제출
 submitBtn.onclick = () => {
   const userAnswer = answerInput.value.trim();
-  if (userAnswer === "") return;
+  if (!userAnswer) return;
 
-  if (userAnswer === videos[current].answer) {
+  const correct = videos[current].answer;
+
+  // 입력 비활성화
+  answerInput.disabled = true;
+  submitBtn.disabled = true;
+
+  if (userAnswer === correct) {
     result.textContent = "✅ 정답!";
     score++;
   } else {
-    result.textContent = `❌ 오답! 정답은 ${videos[current].answer}`;
+    result.textContent = `❌ 오답! 정답은 ${correct}`;
   }
 
-  nextBtn.style.display = "inline-block";
+  // 1초 뒤 자동으로 다음 영상
+  setTimeout(() => {
+    current++;
+    loadVideo();
+  }, 1000);
 };
 
-nextBtn.onclick = () => {
-  current++;
-  loadVideo();
-};
-
+// 🏁 결과 표시
 function showFinalResult() {
   const rate = (score / videos.length) * 100;
   let message = "";
@@ -96,10 +109,13 @@ function showFinalResult() {
   else message = "블리자드 직원입니다 💼";
 
   document.body.innerHTML = `
-    <h1>결과</h1>
-    <p>정답률: ${rate.toFixed(1)}%</p>
-    <h2>${message}</h2>
+    <div style="text-align:center; margin-top:50px;">
+      <h1>결과</h1>
+      <p>정답률: ${rate.toFixed(1)}%</p>
+      <h2>${message}</h2>
+    </div>
   `;
 }
 
+// 시작
 loadVideo();
